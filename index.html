@@ -261,6 +261,7 @@
       <div class="btn-group">
         <button class="btn" onclick="fetchData()">🔄 Refresh</button>
         <button class="btn btn-secondary" onclick="clearFilters()">✕ Clear filters</button>
+        <button class="btn btn-secondary" onclick="filterLast10DaysNoComments()">🔥 Last 10 days (no comments)</button>
       </div>
 
       <div id="stats" class="stats"></div>
@@ -307,7 +308,8 @@
       'Abdulrahman': { countries: ['KSA', 'Saudi Arabia'], label: 'KSA' },
       'Lina': { countries: ['Oman'], label: 'Oman' },
       'Inass': { countries: ['Morocco'], label: 'Morocco' },
-      'Eman': { countries: ['UAE'], label: 'UAE' }
+      'Eman': { countries: ['UAE'], label: 'UAE' },
+      'Roshanka': { countries: ['UAE'], label: 'UAE' }
     };
 
     let allData = [], filteredData = [];
@@ -475,6 +477,17 @@
     function clearFilters() {
       ['filter-search', 'filter-country', 'filter-city', 'filter-category', 'filter-status', 'filter-comments', 'filter-date-from', 'filter-date-to']
         .forEach(id => document.getElementById(id).value = '');
+      applyFilters();
+    }
+
+    function filterLast10DaysNoComments() {
+      clearFilters();
+      const today = new Date();
+      const tenDaysAgo = new Date(today);
+      tenDaysAgo.setDate(today.getDate() - 10);
+      document.getElementById('filter-date-from').value = tenDaysAgo.toISOString().substring(0, 10);
+      document.getElementById('filter-date-to').value = today.toISOString().substring(0, 10);
+      document.getElementById('filter-comments').value = 'without';
       applyFilters();
     }
 
