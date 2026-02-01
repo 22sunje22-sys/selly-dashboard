@@ -512,7 +512,8 @@
     }
 
     function populateFilters() {
-      const countries = [...new Set(allData.map(e => e.country).filter(Boolean))].sort();
+      // Normalize country names for filter dropdown
+      const countries = [...new Set(allData.map(e => normalizeCountry(e.country)).filter(c => c !== 'Unknown'))].sort();
       document.getElementById('filter-country').innerHTML = '<option value="">All countries (' + countries.length + ')</option>' +
         countries.map(c => `<option value="${c}">${c}</option>`).join('');
 
@@ -537,7 +538,7 @@
 
       filteredData = allData.filter(e => {
         if (search && !(e.title || '').toLowerCase().includes(search)) return false;
-        if (country && e.country !== country) return false;
+        if (country && normalizeCountry(e.country) !== country) return false;
         if (city && e.city !== city) return false;
         if (category && e.category !== category) return false;
         if (status && e.status !== status) return false;
@@ -581,23 +582,95 @@
       }
     }
 
+    // Check if filters are active
+    function hasActiveFilters() {
+      return document.getElementById('filter-search').value ||
+             document.getElementById('filter-country').value ||
+             document.getElementById('filter-city').value ||
+             document.getElementById('filter-category').value ||
+             document.getElementById('filter-status').value ||
+             document.getElementById('filter-comments').value ||
+             document.getElementById('filter-date-from').value ||
+             document.getElementById('filter-date-to').value;
+    }
+
+    function getActiveFilterDescription() {
+      const parts = [];
+      const dateFrom = document.getElementById('filter-date-from').value;
+      const dateTo = document.getElementById('filter-date-to').value;
+      const comments = document.getElementById('filter-comments').value;
+      const country = document.getElementById('filter-country').value;
+      const status = document.getElementById('filter-status').value;
+
+      if (dateFrom || dateTo) {
+        if (dateFrom && dateTo) parts.push(`${dateFrom} → ${dateTo}`);
+        else if (dateFrom) parts.push(`from ${dateFrom}`);
+        else parts.push(`until ${dateTo}`);
+      }
+      if (comments === 'without') parts.push('no comments');
+      if (comments === 'with') parts.push('with comments');
+      if (country) parts.push(country);
+      if (status) parts.push(status);
+
+      return parts.length > 0 ? parts.join(' • ') : 'filtered';
+    }
+
     function renderStats() {
       const total = filteredData.length;
       const withComments = filteredData.filter(e => e.comment && e.comment.trim()).length;
-      const countries = new Set(filteredData.map(e => e.country).filter(Boolean)).size;
+      const countries = new Set(filteredData.map(e => normalizeCountry(e.country)).filter(c => c !== 'Unknown')).size;
       const cities = new Set(filteredData.map(e => e.city).filter(Boolean)).size;
 
-      document.getElementById('stats').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Events</div><div class="stat-value">${total}</div></div>
-        <div class="stat-card"><div class="stat-label">Commented</div><div class="stat-value">${withComments}</div></div>
-        <div class="stat-card"><div class="stat-label">% Commented</div><div class="stat-value">${total > 0 ? Math.round(withComments / total * 100) : 0}%</div></div>
-        <div class="stat-card"><div class="stat-label">Countries</div><div class="stat-value">${countries}</div></div>
-        <div class="stat-card"><div class="stat-label">Cities</div><div class="stat-value">${cities}</div></div>
-      `;
+      // Overall stats (all data)
+      const allTotal = allData.length;
+      const allCommented = allData.filter(e => e.comment && e.comment.trim()).length;
+      const allPct = allTotal > 0 ? Math.round(allCommented / allTotal * 100) : 0;
+
+      const isFiltered = hasActiveFilters();
+      const filterDesc = isFiltered ? getActiveFilterDescription() : '';
+
+      let html = '';
+
+      // If filtered, show filtered stats first
+      if (isFiltered) {
+        html += `
+          <div class="stat-card" style="border-color:#ff9500;"><div class="stat-label">🔍 Filtered (${filterDesc})</div><div class="stat-value" style="color:#ff9500;">${total}</div></div>
+          <div class="stat-card"><div class="stat-label">Commented</div><div class="stat-value">${withComments}</div></div>
+          <div class="stat-card"><div class="stat-label">% Commented</div><div class="stat-value">${total > 0 ? Math.round(withComments / total * 100) : 0}%</div></div>
+          <div class="stat-card" style="border-color:#666;"><div class="stat-label">📊 Total Events</div><div class="stat-value" style="color:#888;">${allTotal}</div></div>
+          <div class="stat-card" style="border-color:#666;"><div class="stat-label">📊 Total Commented</div><div class="stat-value" style="color:#888;">${allCommented} (${allPct}%)</div></div>
+        `;
+      } else {
+        html += `
+          <div class="stat-card"><div class="stat-label">Events</div><div class="stat-value">${total}</div></div>
+          <div class="stat-card"><div class="stat-label">Commented</div><div class="stat-value">${withComments}</div></div>
+          <div class="stat-card"><div class="stat-label">% Commented</div><div class="stat-value">${total > 0 ? Math.round(withComments / total * 100) : 0}%</div></div>
+          <div class="stat-card"><div class="stat-label">Countries</div><div class="stat-value">${countries}</div></div>
+          <div class="stat-card"><div class="stat-label">Cities</div><div class="stat-value">${cities}</div></div>
+        `;
+      }
+
+      document.getElementById('stats').innerHTML = html;
     }
 
     function escapeHtml(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''; }
     function escapeAttr(s) { return s ? s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') : ''; }
+
+    // Normalize country names to fix duplicates (BAHRAIN → Bahrain, QATAR → Qatar, etc.)
+    function normalizeCountry(country) {
+      if (!country) return 'Unknown';
+      // Special cases
+      const upper = country.toUpperCase();
+      const mapping = {
+        'UAE': 'UAE',
+        'KSA': 'KSA',
+        'USA': 'USA',
+        'UK': 'UK'
+      };
+      if (mapping[upper]) return mapping[upper];
+      // Title case for others (Bahrain, Qatar, Oman, etc.)
+      return country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
+    }
 
     function getStatusBadge(status) {
       if (!status) return '';
@@ -612,10 +685,10 @@
         return;
       }
 
-      // Group by country
+      // Group by normalized country (merge BAHRAIN/Bahrain, QATAR/Qatar, etc.)
       const byCountry = {};
       filteredData.forEach(e => {
-        const country = e.country || 'Unknown';
+        const country = normalizeCountry(e.country);
         if (!byCountry[country]) byCountry[country] = [];
         byCountry[country].push(e);
       });
