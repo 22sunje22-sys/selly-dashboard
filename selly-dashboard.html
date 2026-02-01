@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selly Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+
+    /* Login */
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); }
+    .login-box { background: #111; padding: 40px; border-radius: 16px; border: 1px solid #333; text-align: center; min-width: 320px; }
+    .login-box h1 { color: #00d4ff; margin-bottom: 5px; font-size: 28px; }
+    .login-box .subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
+    .login-box input { width: 100%; padding: 14px 16px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 16px; margin-bottom: 15px; outline: none; }
+    .login-box input:focus { border-color: #00d4ff; }
+    .login-box button { width: 100%; padding: 14px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+    .login-box button:hover { opacity: 0.9; }
+    .login-error { color: #ff6666; margin-top: 10px; display: none; }
+
+    /* Role Selection */
+    .role-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); }
+    .role-box { background: #111; padding: 40px; border-radius: 16px; border: 1px solid #333; text-align: center; max-width: 500px; width: 90%; }
+    .role-box h2 { color: #00d4ff; margin-bottom: 10px; }
+    .role-box p { color: #666; margin-bottom: 25px; }
+    .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+    .role-btn { padding: 15px 10px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .role-btn:hover { border-color: #00d4ff; background: #222; }
+    .role-btn.selected { border-color: #00d4ff; background: rgba(0,212,255,0.1); }
+    .role-countries { font-size: 10px; color: #666; margin-top: 5px; }
+
+    /* Dashboard */
+    .dashboard { display: none; padding: 20px; }
+    .dashboard.active { display: block; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    .tab { padding: 10px 20px; background: transparent; border: none; color: #666; cursor: pointer; font-size: 14px; border-radius: 8px 8px 0 0; }
+    .tab:hover { color: #fff; }
+    .tab.active { background: #1a1a1a; color: #00d4ff; }
+
+    .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    h1 { color: #00d4ff; margin-bottom: 5px; font-size: 24px; }
+    .user-info { color: #666; font-size: 12px; }
+    .user-info span { color: #00d4ff; }
+
+    .status { padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
+    .loading { background: #111; color: #00d4ff; }
+    .success { background: rgba(0,212,255,0.1); border-color: #00d4ff; }
+    .error { background: rgba(255,0,0,0.1); border-color: #ff4444; color: #ff6666; }
+
+    /* Filters */
+    .filters { background: #111; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .filters-title { color: #00d4ff; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
+    .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .filter-group label { display: block; color: #888; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; }
+    .filter-group input, .filter-group select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; outline: none; }
+    .filter-group input:focus, .filter-group select:focus { border-color: #00d4ff; }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .stat-card { background: #111; border: 1px solid rgba(0,212,255,0.2); border-radius: 12px; padding: 20px; }
+    .stat-label { color: #888; font-size: 11px; text-transform: uppercase; }
+    .stat-value { color: #00d4ff; font-size: 28px; font-weight: bold; margin-top: 5px; }
+
+    .btn-group { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn { background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .btn:hover { opacity: 0.9; }
+    .btn-secondary { background: #333; color: #fff; }
+    .btn-logout { background: transparent; border: 1px solid #ff4444; color: #ff4444; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px; color: #666; border-bottom: 1px solid #333; font-size: 11px; text-transform: uppercase; position: sticky; top: 0; background: #0a0a0a; }
+    td { padding: 12px; border-bottom: 1px solid #222; color: #999; font-size: 13px; }
+    td:first-child { color: #00d4ff; }
+    a { color: #00d4ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    tr:hover { background: rgba(0,212,255,0.03); }
+    .table-container { max-height: 500px; overflow-y: auto; border: 1px solid #333; border-radius: 12px; }
+    .results-info { color: #666; text-align: center; padding: 10px; font-size: 13px; }
+
+    /* Status badges */
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    .status-new { background: rgba(0,212,255,0.2); color: #00d4ff; }
+    .status-done { background: rgba(0,255,136,0.2); color: #00ff88; }
+    .status-skip { background: rgba(255,100,100,0.2); color: #ff6464; }
+
+    /* Comments */
+    .comment-cell { max-width: 200px; }
+    .comment-text { cursor: pointer; padding: 4px 8px; border-radius: 4px; background: #1a1a1a; border: 1px solid #333; display: inline-block; min-width: 80px; font-size: 12px; }
+    .comment-text:hover { border-color: #00d4ff; }
+    .comment-text.empty { color: #555; font-style: italic; }
+    .comment-text.has-comment { color: #00d4ff; }
+    .commented-by { font-size: 10px; color: #666; display: block; margin-top: 2px; }
+
+    /* Country Groups */
+    .country-group { margin-bottom: 30px; }
+    .country-header { background: linear-gradient(135deg, #1a1a1a 0%, #111 100%); padding: 15px 20px; border-radius: 12px 12px 0 0; border: 1px solid #333; border-bottom: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .country-header:hover { background: #222; }
+    .country-header h3 { color: #00d4ff; font-size: 16px; margin: 0; }
+    .country-header .country-stats { color: #888; font-size: 13px; }
+    .country-header .country-stats span { color: #00d4ff; margin-left: 15px; }
+    .country-table-wrap { border: 1px solid #333; border-radius: 0 0 12px 12px; overflow: hidden; }
+    .country-table-wrap.collapsed { display: none; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: #111; border: 1px solid #333; border-radius: 16px; padding: 30px; max-width: 500px; width: 90%; }
+    .modal h3 { color: #00d4ff; margin-bottom: 10px; }
+    .modal-event-title { color: #888; font-size: 14px; margin-bottom: 20px; }
+    .modal textarea { width: 100%; min-height: 120px; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; resize: vertical; outline: none; }
+    .modal textarea:focus { border-color: #00d4ff; }
+    .modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+    .modal-buttons button { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+    .btn-save { background: #00d4ff; color: #000; }
+    .btn-cancel { background: #333; color: #fff; }
+
+    /* Week Tab */
+    .week-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .week-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 20px; }
+    .week-card h4 { color: #00d4ff; margin-bottom: 15px; font-size: 14px; }
+    .progress-bar { height: 20px; background: #1a1a1a; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+    .progress-fill { height: 100%; transition: width 0.3s; }
+    .progress-commented { background: linear-gradient(90deg, #00d4ff, #0099cc); }
+    .progress-empty { background: #333; }
+    .week-numbers { display: flex; justify-content: space-between; font-size: 12px; color: #888; }
+
+    /* Flatpickr */
+    .flatpickr-calendar { background: #111 !important; border: 1px solid #333 !important; }
+    .flatpickr-months .flatpickr-month { background: #111 !important; color: #00d4ff !important; }
+    .flatpickr-current-month .flatpickr-monthDropdown-months { background: #111 !important; color: #00d4ff !important; }
+    .flatpickr-current-month input.cur-year { color: #00d4ff !important; }
+    .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: #00d4ff !important; fill: #00d4ff !important; }
+    .flatpickr-weekdays { background: #111 !important; }
+    span.flatpickr-weekday { color: #666 !important; background: #111 !important; }
+    .flatpickr-days { background: #111 !important; }
+    .flatpickr-day { color: #fff !important; border-radius: 4px !important; }
+    .flatpickr-day:hover { background: #333 !important; border-color: #333 !important; }
+    .flatpickr-day.selected { background: #00d4ff !important; border-color: #00d4ff !important; color: #000 !important; }
+    .flatpickr-day.today { border-color: #00d4ff !important; }
+    .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color: #444 !important; }
+
+    @media (max-width: 768px) {
+      .dashboard { padding: 10px; }
+      .filters-grid { grid-template-columns: 1fr; }
+      .role-grid { grid-template-columns: repeat(2, 1fr); }
+      .btn-group { flex-direction: column; }
+      .btn-group .btn { width: 100%; }
+      table { font-size: 12px; min-width: 700px; }
+      .table-container { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-box">
+      <h1>📊 Selly</h1>
+      <p class="subtitle">Platinumlist Sales Dashboard</p>
+      <input type="password" id="password-input" placeholder="Password" onkeypress="if(event.key==='Enter')login()">
+      <button onclick="login()">Login</button>
+      <p class="login-error" id="login-error">Invalid password</p>
+    </div>
+  </div>
+
+  <!-- Role Selection -->
+  <div id="role-screen" class="role-screen" style="display:none;">
+    <div class="role-box">
+      <h2>👤 Select Your Role</h2>
+      <p>Choose your name to see your assigned countries</p>
+      <div class="role-grid" id="role-grid"></div>
+      <button class="btn" style="margin-top:20px;width:100%" onclick="confirmRole()">Continue</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="dashboard">
+    <div class="header">
+      <div>
+        <h1>📊 Selly Dashboard</h1>
+        <p class="user-info">Logged in as <span id="current-user"></span> • <span id="user-countries"></span></p>
+      </div>
+      <div>
+        <button class="btn btn-secondary" onclick="changeRole()">Change Role</button>
+        <button class="btn btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('data')">📋 Data</button>
+      <button class="tab" onclick="switchTab('week')">📈 Week Stats</button>
+    </div>
+
+    <!-- Data Tab -->
+    <div id="tab-data">
+      <div id="status" class="status loading">⏳ Loading...</div>
+
+      <div class="filters">
+        <div class="filters-title" onclick="toggleFilters()">
+          <span>🔍 Filters</span>
+          <span id="filters-toggle">▼</span>
+        </div>
+        <div class="filters-grid" id="filters-grid">
+          <div class="filter-group">
+            <label>Search</label>
+            <input type="text" id="filter-search" placeholder="Event title..." oninput="applyFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Country</label>
+            <select id="filter-country" onchange="applyFilters()">
+              <option value="">All countries</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>City</label>
+            <select id="filter-city" onchange="applyFilters()">
+              <option value="">All cities</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Category</label>
+            <select id="filter-category" onchange="applyFilters()">
+              <option value="">All categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select id="filter-status" onchange="applyFilters()">
+              <option value="">All</option>
+              <option value="new">New</option>
+              <option value="done">Done</option>
+              <option value="skip">Skip</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Comments</label>
+            <select id="filter-comments" onchange="applyFilters()">
+              <option value="">All</option>
+              <option value="with">With comments</option>
+              <option value="without">Without comments</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Date from</label>
+            <input type="date" id="filter-date-from" onchange="applyFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Date to</label>
+            <input type="date" id="filter-date-to" onchange="applyFilters()">
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" onclick="fetchData()">🔄 Refresh</button>
+        <button class="btn btn-secondary" onclick="clearFilters()">✕ Clear filters</button>
+      </div>
+
+      <div id="stats" class="stats"></div>
+      <div id="table-container"></div>
+    </div>
+
+    <!-- Week Tab -->
+    <div id="tab-week" style="display:none;">
+      <div id="week-content"></div>
+    </div>
+  </div>
+
+  <!-- Comment Modal -->
+  <div id="comment-modal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <h3>💬 Comment</h3>
+      <p class="modal-event-title" id="modal-event-title"></p>
+      <textarea id="comment-input" placeholder="Enter comment..."></textarea>
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" id="btn-save" onclick="saveComment()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Config
+    const SUPABASE_URL = 'https://kwftlkfvtglnugxsyjci.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3ZnRsa2Z2dGdsbnVneHN5amNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2NDAxODUsImV4cCI6MjA2MzIxNjE4NX0.9Cn1xahmF8q6pbbWQHNyQSc9fZkVvJaqTzMRZCtmb9E';
+    const PASSWORD = 'selly30';
+
+    // GCC Countries
+    const GCC = ['UAE', 'Bahrain', 'BAHRAIN', 'Qatar', 'QATAR', 'KSA', 'Saudi Arabia', 'Oman', 'Kuwait'];
+
+    // Roles and their countries
+    const ROLES = {
+      'Cosmin': { countries: null, label: 'All Countries' }, // null = all
+      'Paul': { countries: ['UAE'], label: 'UAE' },
+      'Osama': { countries: GCC, label: 'All GCC' },
+      'Alexandra': { countries: ['UAE'], label: 'UAE' },
+      'Ahmed': { countries: ['Bahrain', 'BAHRAIN', 'Qatar', 'QATAR', 'Lebanon'], label: 'Bahrain, Qatar, Lebanon' },
+      'Khalid': { countries: ['Qatar', 'QATAR'], label: 'Qatar' },
+      'MoayadNQ': { countries: ['KSA', 'Saudi Arabia'], label: 'KSA' },
+      'Abdulrahman': { countries: ['KSA', 'Saudi Arabia'], label: 'KSA' },
+      'Lina': { countries: ['Oman'], label: 'Oman' },
+      'Inass': { countries: ['Morocco'], label: 'Morocco' },
+      'Eman': { countries: ['UAE'], label: 'UAE' }
+    };
+
+    let allData = [], filteredData = [];
+    let currentRole = null;
+    let currentEditId = null;
+
+    // Auth
+    function login() {
+      const input = document.getElementById('password-input');
+      if (input.value === PASSWORD) {
+        sessionStorage.setItem('selly_auth', 'true');
+        showRoleSelection();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+        input.value = '';
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem('selly_auth');
+      sessionStorage.removeItem('selly_role');
+      location.reload();
+    }
+
+    function showRoleSelection() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('role-screen').style.display = 'flex';
+      renderRoleGrid();
+    }
+
+    function renderRoleGrid() {
+      const grid = document.getElementById('role-grid');
+      grid.innerHTML = Object.entries(ROLES).map(([name, info]) => `
+        <div class="role-btn" data-role="${name}" onclick="selectRole('${name}')">
+          ${name}
+          <div class="role-countries">${info.label}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectRole(role) {
+      document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('selected'));
+      document.querySelector(`[data-role="${role}"]`).classList.add('selected');
+      currentRole = role;
+    }
+
+    function confirmRole() {
+      if (!currentRole) { alert('Please select a role'); return; }
+      sessionStorage.setItem('selly_role', currentRole);
+      showDashboard();
+    }
+
+    function changeRole() {
+      sessionStorage.removeItem('selly_role');
+      currentRole = null;
+      document.getElementById('dashboard').classList.remove('active');
+      showRoleSelection();
+    }
+
+    function showDashboard() {
+      currentRole = sessionStorage.getItem('selly_role');
+      document.getElementById('role-screen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('active');
+      document.getElementById('current-user').textContent = currentRole;
+      document.getElementById('user-countries').textContent = ROLES[currentRole].label;
+      fetchData();
+    }
+
+    function checkAuth() {
+      if (sessionStorage.getItem('selly_auth') === 'true') {
+        if (sessionStorage.getItem('selly_role')) {
+          showDashboard();
+        } else {
+          showRoleSelection();
+        }
+      }
+    }
+
+    // Tabs
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+
+      document.getElementById('tab-data').style.display = tab === 'data' ? 'block' : 'none';
+      document.getElementById('tab-week').style.display = tab === 'week' ? 'block' : 'none';
+
+      if (tab === 'week') renderWeekStats();
+    }
+
+    // Data
+    async function fetchData() {
+      const statusEl = document.getElementById('status');
+      statusEl.className = 'status loading';
+      statusEl.innerHTML = '⏳ Loading from Supabase...';
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/selly_clean?select=*&order=date.desc`,
+          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Range': '0-9999' } }
+        );
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        let data = await response.json();
+
+        // Filter by role countries
+        const roleInfo = ROLES[currentRole];
+        if (roleInfo.countries) {
+          data = data.filter(e => roleInfo.countries.includes(e.country));
+        }
+
+        allData = data;
+        statusEl.className = 'status success';
+        statusEl.innerHTML = `✅ Loaded ${allData.length} events`;
+
+        populateFilters();
+        applyFilters();
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.innerHTML = `❌ Error: ${error.message}`;
+      }
+    }
+
+    function populateFilters() {
+      const countries = [...new Set(allData.map(e => e.country).filter(Boolean))].sort();
+      document.getElementById('filter-country').innerHTML = '<option value="">All countries (' + countries.length + ')</option>' +
+        countries.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      const cities = [...new Set(allData.map(e => e.city).filter(Boolean))].sort();
+      document.getElementById('filter-city').innerHTML = '<option value="">All cities (' + cities.length + ')</option>' +
+        cities.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      const categories = [...new Set(allData.map(e => e.category).filter(Boolean))].sort();
+      document.getElementById('filter-category').innerHTML = '<option value="">All categories (' + categories.length + ')</option>' +
+        categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('filter-search').value.toLowerCase();
+      const country = document.getElementById('filter-country').value;
+      const city = document.getElementById('filter-city').value;
+      const category = document.getElementById('filter-category').value;
+      const status = document.getElementById('filter-status').value;
+      const comments = document.getElementById('filter-comments').value;
+      const dateFrom = document.getElementById('filter-date-from').value;
+      const dateTo = document.getElementById('filter-date-to').value;
+
+      filteredData = allData.filter(e => {
+        if (search && !(e.title || '').toLowerCase().includes(search)) return false;
+        if (country && e.country !== country) return false;
+        if (city && e.city !== city) return false;
+        if (category && e.category !== category) return false;
+        if (status && e.status !== status) return false;
+        if (comments === 'with' && (!e.comment || !e.comment.trim())) return false;
+        if (comments === 'without' && e.comment && e.comment.trim()) return false;
+        if (dateFrom && e.date && e.date < dateFrom) return false;
+        if (dateTo && e.date && e.date > dateTo) return false;
+        return true;
+      });
+
+      renderStats();
+      renderTable();
+    }
+
+    function clearFilters() {
+      ['filter-search', 'filter-country', 'filter-city', 'filter-category', 'filter-status', 'filter-comments', 'filter-date-from', 'filter-date-to']
+        .forEach(id => document.getElementById(id).value = '');
+      applyFilters();
+    }
+
+    function toggleFilters() {
+      const grid = document.getElementById('filters-grid');
+      const toggle = document.getElementById('filters-toggle');
+      if (grid.style.display === 'none') {
+        grid.style.display = 'grid';
+        toggle.textContent = '▼';
+      } else {
+        grid.style.display = 'none';
+        toggle.textContent = '▶';
+      }
+    }
+
+    function renderStats() {
+      const total = filteredData.length;
+      const withComments = filteredData.filter(e => e.comment && e.comment.trim()).length;
+      const countries = new Set(filteredData.map(e => e.country).filter(Boolean)).size;
+      const cities = new Set(filteredData.map(e => e.city).filter(Boolean)).size;
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Events</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card"><div class="stat-label">Commented</div><div class="stat-value">${withComments}</div></div>
+        <div class="stat-card"><div class="stat-label">% Commented</div><div class="stat-value">${total > 0 ? Math.round(withComments / total * 100) : 0}%</div></div>
+        <div class="stat-card"><div class="stat-label">Countries</div><div class="stat-value">${countries}</div></div>
+        <div class="stat-card"><div class="stat-label">Cities</div><div class="stat-value">${cities}</div></div>
+      `;
+    }
+
+    function escapeHtml(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''; }
+    function escapeAttr(s) { return s ? s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') : ''; }
+
+    function getStatusBadge(status) {
+      if (!status) return '';
+      const cls = status === 'done' ? 'status-done' : status === 'skip' ? 'status-skip' : 'status-new';
+      return `<span class="status-badge ${cls}">${status}</span>`;
+    }
+
+    function renderTable() {
+      const el = document.getElementById('table-container');
+      if (filteredData.length === 0) {
+        el.innerHTML = '<p class="results-info">No events found</p>';
+        return;
+      }
+
+      // Group by country
+      const byCountry = {};
+      filteredData.forEach(e => {
+        const country = e.country || 'Unknown';
+        if (!byCountry[country]) byCountry[country] = [];
+        byCountry[country].push(e);
+      });
+
+      // Sort countries alphabetically
+      const sortedCountries = Object.keys(byCountry).sort();
+
+      const renderRow = (e) => {
+        const hasComment = e.comment && e.comment.trim();
+        return `<tr>
+          <td>${e.url ? `<a href="${e.url}" target="_blank">${escapeHtml(e.title)}</a>` : escapeHtml(e.title) || '—'}</td>
+          <td>${escapeHtml(e.city) || '—'}</td>
+          <td>${escapeHtml(e.category) || '—'}</td>
+          <td>${e.date || '—'}</td>
+          <td>${getStatusBadge(e.status)}</td>
+          <td class="comment-cell">
+            <span class="comment-text ${hasComment ? 'has-comment' : 'empty'}"
+              data-id="${e.id}" data-title="${escapeAttr(e.title)}" data-comment="${escapeAttr(e.comment)}">
+              ${hasComment ? escapeHtml(e.comment).substring(0, 30) + (e.comment.length > 30 ? '...' : '') : '+ add'}
+              ${e.commented_by ? `<span class="commented-by">by ${escapeHtml(e.commented_by)}</span>` : ''}
+            </span>
+          </td>
+        </tr>`;
+      };
+
+      let html = '';
+      sortedCountries.forEach(country => {
+        const events = byCountry[country];
+        const commented = events.filter(e => e.comment && e.comment.trim()).length;
+        const pct = Math.round(commented / events.length * 100);
+
+        html += `
+          <div class="country-group">
+            <div class="country-header" onclick="toggleCountry(this)">
+              <h3>🌍 ${escapeHtml(country)}</h3>
+              <div class="country-stats">
+                Events: <span>${events.length}</span>
+                Commented: <span>${commented} (${pct}%)</span>
+              </div>
+            </div>
+            <div class="country-table-wrap">
+              <table>
+                <thead><tr>
+                  <th>Title</th><th>City</th><th>Category</th><th>Date</th><th>Status</th><th>Comment</th>
+                </tr></thead>
+                <tbody>${events.map(renderRow).join('')}</tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `<p class="results-info">Showing ${filteredData.length} events in ${sortedCountries.length} countries</p>`;
+      el.innerHTML = html;
+    }
+
+    function toggleCountry(header) {
+      const wrap = header.nextElementSibling;
+      wrap.classList.toggle('collapsed');
+    }
+
+    // Week Stats
+    function renderWeekStats() {
+      const weekData = {};
+
+      allData.forEach(e => {
+        if (!e.date) return;
+        const date = new Date(e.date);
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay() + 1); // Monday
+        const weekKey = weekStart.toISOString().substring(0, 10);
+
+        if (!weekData[weekKey]) {
+          weekData[weekKey] = { total: 0, commented: 0 };
+        }
+        weekData[weekKey].total++;
+        if (e.comment && e.comment.trim()) {
+          weekData[weekKey].commented++;
+        }
+      });
+
+      const sortedWeeks = Object.entries(weekData).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 12);
+
+      const html = `
+        <h3 style="color:#00d4ff;margin-bottom:20px;">📈 Comment Progress by Week</h3>
+        <div class="week-stats">
+          ${sortedWeeks.map(([week, data]) => {
+            const pct = data.total > 0 ? Math.round(data.commented / data.total * 100) : 0;
+            const weekEnd = new Date(week);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            return `
+              <div class="week-card">
+                <h4>Week of ${week}</h4>
+                <div class="progress-bar">
+                  <div class="progress-fill progress-commented" style="width:${pct}%"></div>
+                </div>
+                <div class="week-numbers">
+                  <span>${data.commented} commented</span>
+                  <span>${pct}%</span>
+                  <span>${data.total} total</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div style="margin-top:30px;padding:20px;background:#111;border-radius:12px;border:1px solid #333;">
+          <h4 style="color:#00d4ff;margin-bottom:15px;">📊 Overall Progress</h4>
+          <p style="color:#888;font-size:14px;">
+            Total events: <strong style="color:#fff">${allData.length}</strong> |
+            Commented: <strong style="color:#00d4ff">${allData.filter(e => e.comment && e.comment.trim()).length}</strong> |
+            Percentage: <strong style="color:#00ff88">${allData.length > 0 ? Math.round(allData.filter(e => e.comment && e.comment.trim()).length / allData.length * 100) : 0}%</strong>
+          </p>
+        </div>
+      `;
+
+      document.getElementById('week-content').innerHTML = html;
+    }
+
+    // Comment Modal
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('comment-text')) {
+        currentEditId = e.target.dataset.id;
+        document.getElementById('modal-event-title').textContent = e.target.dataset.title || 'Event';
+        document.getElementById('comment-input').value = e.target.dataset.comment || '';
+        document.getElementById('comment-modal').classList.add('active');
+        document.getElementById('comment-input').focus();
+      }
+    });
+
+    function closeModal() {
+      document.getElementById('comment-modal').classList.remove('active');
+      currentEditId = null;
+    }
+
+    async function saveComment() {
+      if (!currentEditId) return;
+      const comment = document.getElementById('comment-input').value;
+      const btn = document.getElementById('btn-save');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/selly_clean?id=eq.${currentEditId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ comment: comment, commented_by: currentRole })
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const idx = allData.findIndex(e => e.id === currentEditId);
+        if (idx !== -1) {
+          allData[idx].comment = comment;
+          allData[idx].commented_by = currentRole;
+        }
+
+        closeModal();
+        applyFilters();
+        document.getElementById('status').innerHTML = '✅ Comment saved';
+      } catch (error) {
+        alert('Error: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+      }
+    }
+
+    // Init
+    checkAuth();
+
+    // Flatpickr
+    const fpConfig = {
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd.m.Y',
+      allowInput: true,
+      onChange: applyFilters
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/flatpickr';
+    script.onload = () => {
+      flatpickr('#filter-date-from', fpConfig);
+      flatpickr('#filter-date-to', fpConfig);
+    };
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>
