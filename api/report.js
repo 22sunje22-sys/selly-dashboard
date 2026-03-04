@@ -1,5 +1,7 @@
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK_URL;
 const AHMED_SLACK_ID = 'U0A6YEGD6GY';
+const AHMED_ASANA_GID = '1212814279569798';
+const SELLY_PROJECT_GID = '1213539244947688';
 
 async function asanaRequest(endpoint, options = {}) {
   const ASANA_PAT = process.env.ASANA_PAT;
@@ -16,21 +18,6 @@ async function asanaRequest(endpoint, options = {}) {
   return data;
 }
 
-async function findSellyProjectAndAhmed() {
-  const { data: workspaces } = await asanaRequest('/workspaces');
-  for (const workspace of workspaces) {
-    const { data: projects } = await asanaRequest(`/projects?workspace=${workspace.gid}&limit=100`);
-    const sellyProject = projects.find(p => p.name.toLowerCase().includes('selly'));
-    if (sellyProject) {
-      const { data: users } = await asanaRequest(`/users?workspace=${workspace.gid}&opt_fields=name,email&limit=100`);
-      const ahmed = users.find(u => u.name.toLowerCase().includes('ahmed'));
-      if (!ahmed) throw new Error('Could not find Ahmed in workspace');
-      return { projectGid: sellyProject.gid, workspaceGid: workspace.gid, ahmedGid: ahmed.gid };
-    }
-  }
-  throw new Error('Could not find Selly project in Asana');
-}
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -44,8 +31,6 @@ module.exports = async (req, res) => {
 
     const { feature, issueType, severity, description, steps, reporter, expectedVsActual } = req.body;
     if (!description) return res.status(400).json({ error: 'Description is required' });
-
-    const { projectGid, ahmedGid } = await findSellyProjectAndAhmed();
 
     const taskNotes = [
       `🐛 Bug Report from Selly Dashboard`,
@@ -70,13 +55,13 @@ module.exports = async (req, res) => {
         data: {
           name: taskTitle,
           notes: taskNotes,
-          assignee: ahmedGid,
-          projects: [projectGid]
+          assignee: AHMED_ASANA_GID,
+          projects: [SELLY_PROJECT_GID]
         }
       })
     });
 
-    const taskUrl = `https://app.asana.com/0/${projectGid}/${task.gid}`;
+    const taskUrl = `https://app.asana.com/0/${SELLY_PROJECT_GID}/${task.gid}`;
 
     const slackMessage = {
       text: `🐛 *New Bug Report* — <@${AHMED_SLACK_ID}> needs your attention!`,
