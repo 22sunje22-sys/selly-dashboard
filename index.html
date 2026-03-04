@@ -122,6 +122,11 @@
     .modal-buttons button { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
     .btn-save { background: #00d4ff; color: #000; }
     .btn-cancel { background: #333; color: #fff; }
+    .modal select, .modal input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; outline: none; box-sizing: border-box; appearance: none; }
+    .modal select:focus, .modal input[type="text"]:focus { border-color: #00d4ff; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { display: block; color: #888; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .modal textarea { box-sizing: border-box; }
 
     /* Week Tab */
     .week-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
@@ -322,6 +327,7 @@
         <button class="btn" onclick="fetchData()">🔄 Refresh</button>
         <button class="btn btn-secondary" onclick="clearFilters()">✕ Clear filters</button>
         <button class="btn btn-secondary" onclick="filterLast10DaysNoComments()">🔥 Last 10 days (no comments)</button>
+        <button class="btn btn-secondary" onclick="openReportModal()">🐛 Report</button>
       </div>
 
       <div id="stats" class="stats"></div>
@@ -343,6 +349,74 @@
       <div class="modal-buttons">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-save" id="btn-save" onclick="saveComment()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div id="report-modal" class="modal-overlay" onclick="if(event.target===this)closeReportModal()">
+    <div class="modal" style="max-width:560px">
+      <h3>🐛 Report an Issue</h3>
+      <p class="modal-event-title">Help Ahmed fix it — fill in as much detail as possible</p>
+
+      <div class="modal-field">
+        <label>Feature / Area</label>
+        <select id="report-feature">
+          <option value="">Select feature...</option>
+          <option>Dashboard — Filters</option>
+          <option>Dashboard — Table / Data</option>
+          <option>Dashboard — Stats</option>
+          <option>Dashboard — Comments</option>
+          <option>Weekly Report</option>
+          <option>Login / Access</option>
+          <option>Performance / Speed</option>
+          <option>Export / Download</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label>Issue Type</label>
+        <select id="report-type">
+          <option value="">Select type...</option>
+          <option>🐛 Bug — something is broken</option>
+          <option>📊 Wrong Data — numbers/info don't look right</option>
+          <option>💡 Feature Request — something useful to add</option>
+          <option>🎨 UI / Display Issue</option>
+          <option>🐢 Performance / Slow</option>
+          <option>❓ Other</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label>Severity</label>
+        <select id="report-severity">
+          <option value="">Select severity...</option>
+          <option>🔴 Critical — can't work at all</option>
+          <option>🟠 High — major functionality broken</option>
+          <option>🟡 Medium — works but with issues</option>
+          <option>🟢 Low — minor annoyance</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label>What's happening? (required)</label>
+        <textarea id="report-description" placeholder="Describe the issue clearly..." style="min-height:80px"></textarea>
+      </div>
+
+      <div class="modal-field">
+        <label>Steps to reproduce (optional)</label>
+        <textarea id="report-steps" placeholder="1. Go to...&#10;2. Click...&#10;3. See error..." style="min-height:60px"></textarea>
+      </div>
+
+      <div class="modal-field">
+        <label>Expected vs Actual (optional)</label>
+        <textarea id="report-expected" placeholder="Expected: ...&#10;Actual: ..." style="min-height:60px"></textarea>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeReportModal()">Cancel</button>
+        <button class="btn-save" id="btn-report-submit" onclick="submitReport()">Send Report</button>
       </div>
     </div>
   </div>
@@ -901,6 +975,55 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Save';
+      }
+    }
+
+    function openReportModal() {
+      document.getElementById('report-modal').classList.add('active');
+    }
+
+    function closeReportModal() {
+      document.getElementById('report-modal').classList.remove('active');
+      ['report-feature', 'report-type', 'report-severity', 'report-description', 'report-steps', 'report-expected'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+
+    async function submitReport() {
+      const feature = document.getElementById('report-feature').value;
+      const issueType = document.getElementById('report-type').value;
+      const severity = document.getElementById('report-severity').value;
+      const description = document.getElementById('report-description').value.trim();
+      const steps = document.getElementById('report-steps').value.trim();
+      const expectedVsActual = document.getElementById('report-expected').value.trim();
+
+      if (!feature) return alert('Please select a feature.');
+      if (!issueType) return alert('Please select an issue type.');
+      if (!severity) return alert('Please select severity.');
+      if (!description) return alert('Please describe the issue.');
+
+      const btn = document.getElementById('btn-report-submit');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      try {
+        const res = await fetch('/api/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feature, issueType, severity, description, steps, expectedVsActual, reporter: currentRole })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to send report');
+
+        closeReportModal();
+        document.getElementById('status').innerHTML = '✅ Report sent — Ahmed will check it!';
+      } catch (error) {
+        alert('Error sending report: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Report';
       }
     }
 
