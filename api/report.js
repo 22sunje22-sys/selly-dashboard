@@ -1,4 +1,4 @@
-const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK;
+const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK_URL;
 const AHMED_SLACK_ID = 'U0A6YEGD6GY';
 
 async function asanaRequest(endpoint, options = {}) {
