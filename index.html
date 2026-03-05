@@ -509,6 +509,7 @@
     }
 
     async function updateStatus(eventId, newStatus, selectEl) {
+      if (newStatus === '__legacy__') return; // disabled option, shouldn't fire
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/selly_clean?id=eq.${eventId}`, {
           method: 'PATCH',
@@ -904,8 +905,10 @@
           <td>${escapeHtml(e.city) || '—'}</td>
           <td>${escapeHtml(e.category) || '—'}</td>
           <td>${e.date || '—'}</td>
-          <td><select class="status-select${['new','done','skip'].includes(e.status) ? ' s-' + e.status : ''}" onchange="updateStatus('${e.id}', this.value, this)">
-            <option value="" ${!e.status ? 'selected' : ''}>—</option>
+          <td><select class="status-select${['new','done','skip'].includes(e.status) ? ' s-' + e.status : ''}" onchange="updateStatus('${e.id}', this.value, this)" title="${escapeAttr(e.status || '')}">
+            ${e.status && !['new','done','skip'].includes(e.status)
+              ? `<option value="__legacy__" disabled selected>${escapeHtml(e.status.substring(0,30))}${e.status.length>30?'…':''}</option><option value="">— clear —</option>`
+              : `<option value="" ${!e.status ? 'selected' : ''}>—</option>`}
             <option value="new" ${e.status === 'new' ? 'selected' : ''}>new</option>
             <option value="done" ${e.status === 'done' ? 'selected' : ''}>done</option>
             <option value="skip" ${e.status === 'skip' ? 'selected' : ''}>skip</option>
