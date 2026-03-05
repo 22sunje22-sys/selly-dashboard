@@ -92,14 +92,13 @@
     .status-done { background: rgba(0,255,136,0.2); color: #00ff88; }
     .status-skip { background: rgba(255,100,100,0.2); color: #ff6464; }
 
-    /* Status select */
-    .status-select { background: #1a1a1a; border: 1px solid #333; color: #ccc; border-radius: 4px; padding: 4px 6px; font-size: 12px; cursor: pointer; min-width: 70px; }
-    .status-select:hover { border-color: #aaa; }
-    .status-select:focus { outline: none; border-color: #aaa; }
-    .status-select option { background: #1a1a1a; }
-    .status-select.s-new { color: #00d4ff; border-color: rgba(0,212,255,0.3); }
-    .status-select.s-done { color: #00ff88; border-color: rgba(0,255,136,0.3); }
-    .status-select.s-skip { color: #ff6464; border-color: rgba(255,100,100,0.3); }
+    /* Status combobox */
+    .status-input { background: #1a1a1a; border: 1px solid #333; color: #ccc; border-radius: 4px; padding: 4px 6px; font-size: 12px; min-width: 150px; width: 150px; }
+    .status-input:hover { border-color: #aaa; }
+    .status-input:focus { outline: none; border-color: #aaa; }
+    .status-input.s-new  { color: #00d4ff; border-color: rgba(0,212,255,0.3); }
+    .status-input.s-done { color: #00ff88; border-color: rgba(0,255,136,0.3); }
+    .status-input.s-skip { color: #ff6464; border-color: rgba(255,100,100,0.3); }
 
     /* Comments */
     .comment-cell { max-width: 200px; }
@@ -154,6 +153,47 @@
     .progress-commented { background: linear-gradient(90deg, #00d4ff, #0099cc); }
     .progress-empty { background: #333; }
     .week-numbers { display: flex; justify-content: space-between; font-size: 12px; color: #888; }
+
+    /* Role Groups */
+    .role-box { max-width: 660px !important; }
+    #role-grid { display: flex; flex-direction: column; gap: 0; }
+    .role-group-section { margin-bottom: 10px; }
+    .role-group-label { color: #555; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 8px 2px 5px; border-top: 1px solid #1e1e1e; }
+    .role-group-section:first-child .role-group-label { border-top: none; padding-top: 0; }
+    .role-group-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    .role-group-btns .role-btn { min-width: 110px; flex: 0 0 auto; text-align: left; }
+
+    /* Analytics Dashboard */
+    .analytics-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .analytics-card h3 { color: #00d4ff; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+    .analytics-table { width: 100%; border-collapse: collapse; }
+    .analytics-table th { text-align: left; padding: 10px 12px; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #333; background: #0d0d0d; }
+    .analytics-table td { padding: 12px; border-bottom: 1px solid #1a1a1a; font-size: 13px; color: #999; }
+    .analytics-table td:first-child { color: #fff; font-weight: 500; }
+    .analytics-table tr:hover td { background: rgba(0,212,255,0.03); }
+    .analytics-total-row td { background: #1a1400 !important; border-top: 2px solid #444; color: #ffcc00 !important; font-weight: bold; }
+    .analytics-num { color: #00d4ff !important; font-weight: bold; }
+    .analytics-num-warn { color: #ff6464 !important; font-weight: bold; }
+    .analytics-progress { display: flex; align-items: center; gap: 8px; }
+    .analytics-bar { flex: 1; height: 14px; background: #1a1a1a; border-radius: 3px; overflow: hidden; min-width: 60px; }
+    .analytics-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+    .analytics-pct { font-size: 12px; font-weight: bold; min-width: 38px; text-align: right; }
+    .fill-green { background: linear-gradient(90deg, #00ff88, #00cc66); } .pct-green { color: #00ff88; }
+    .fill-orange { background: linear-gradient(90deg, #ffaa00, #ff7700); } .pct-orange { color: #ffaa00; }
+    .fill-red { background: linear-gradient(90deg, #ff6464, #cc2222); } .pct-red { color: #ff6464; }
+    .fill-gray { background: #333; } .pct-gray { color: #555; }
+    .analytics-period-bar { display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 20px; }
+    .analytics-period-bar label { color: #888; font-size: 12px; }
+    .analytics-period-bar select { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 7px 12px; border-radius: 7px; font-size: 13px; outline: none; cursor: pointer; }
+    .analytics-period-bar select:focus { border-color: #00d4ff; }
+
+    /* Toast */
+    #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#222; color:#fff; padding:10px 20px; border-radius:8px; font-size:13px;
+      opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; z-index:9999; white-space:nowrap; }
+    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    #toast.ok  { border-left:3px solid #4caf50; }
+    #toast.err { border-left:3px solid #f44336; }
 
     /* Flatpickr */
     .flatpickr-calendar { background: #111 !important; border: 1px solid #333 !important; }
@@ -239,6 +279,25 @@
   </style>
 </head>
 <body>
+  <div id="toast"></div>
+  <datalist id="status-options">
+    <option value="new">
+    <option value="done">
+    <option value="skip">
+    <option value="Not on platinumlist">
+    <option value="we have it on platinumlist as non exclusive">
+    <option value="Morocco team pls check">
+    <option value="Lebanon team pls check">
+    <option value="Business events">
+    <option value="Kuwait, don't have inventory for now">
+    <option value="Bahrain team pls check">
+    <option value="Qatar team pls check">
+    <option value="Live Nation">
+    <option value="Listing Only">
+    <option value="Attractions">
+    <option value="something strange pls check">
+    <option value="Oman team pls check">
+  </datalist>
 
   <!-- Login Screen -->
   <div id="login-screen" class="login-screen">
@@ -274,10 +333,17 @@
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
+    <!-- Tabs (regular roles) -->
+    <div class="tabs" id="regular-tabs">
       <button class="tab active" onclick="switchTab('data')">📋 Data</button>
       <button class="tab" onclick="switchTab('week')">📈 Week Stats</button>
+    </div>
+
+    <!-- Tabs (Ahmed Ryan analytics) -->
+    <div class="tabs" id="analytics-tabs" style="display:none;">
+      <button class="tab active" onclick="switchAnalyticsTab('countries')">🌍 Events by Country</button>
+      <button class="tab" onclick="switchAnalyticsTab('weeks')">📈 Week Stats</button>
+      <button class="tab" onclick="switchAnalyticsTab('team')">👥 Team Performance</button>
     </div>
 
     <!-- Data Tab -->
@@ -354,6 +420,13 @@
     <!-- Week Tab -->
     <div id="tab-week" style="display:none;">
       <div id="week-content"></div>
+    </div>
+
+    <!-- Analytics Content (Ahmed Ryan) -->
+    <div id="analytics-content" style="display:none;">
+      <div id="analytics-tab-countries"></div>
+      <div id="analytics-tab-weeks" style="display:none;"></div>
+      <div id="analytics-tab-team" style="display:none;"></div>
     </div>
   </div>
 
@@ -449,19 +522,27 @@
 
     // Roles and their countries
     const ROLES = {
-      'Cosmin': { countries: null, label: 'All Countries' }, // null = all
-      'Paul': { countries: ['UAE'], label: 'UAE' },
-      'Osama': { countries: GCC, label: 'All GCC' },
-      'Alexandra': { countries: ['UAE'], label: 'UAE' },
-      'Ahmed': { countries: ['Bahrain', 'BAHRAIN', 'Qatar', 'QATAR', 'Lebanon'], label: 'Bahrain, Qatar, Lebanon' },
-      'Khalid': { countries: ['Qatar', 'QATAR'], label: 'Qatar' },
-      'MoayadNQ': { countries: ['KSA', 'Saudi Arabia'], label: 'KSA' },
-      'Abdulrahman': { countries: ['KSA', 'Saudi Arabia'], label: 'KSA' },
-      'Lina': { countries: ['Oman'], label: 'Oman' },
-      'Inass': { countries: ['Morocco'], label: 'Morocco' },
-      'Eman': { countries: ['UAE'], label: 'UAE' },
-      'Roshanka': { countries: ['UAE'], label: 'UAE' }
+      'Cosmin':       { countries: null,                                                 label: 'All Countries',           flag: '🌍' },
+      'Paul':         { countries: ['UAE'],                                              label: 'UAE',                     flag: '🇦🇪' },
+      'Osama':        { countries: GCC,                                                  label: 'All GCC',                 flag: '🌍' },
+      'Alexandra':    { countries: ['UAE'],                                              label: 'UAE',                     flag: '🇦🇪' },
+      'Ahmed':        { countries: ['Bahrain', 'BAHRAIN', 'Qatar', 'QATAR', 'Lebanon'], label: 'Bahrain, Qatar, Lebanon', flag: '🇧🇭🇶🇦🇱🇧' },
+      'Khalid':       { countries: ['Qatar', 'QATAR'],                                  label: 'Qatar',                   flag: '🇶🇦' },
+      'MoayadNQ':     { countries: ['KSA', 'Saudi Arabia'],                             label: 'KSA',                     flag: '🇸🇦' },
+      'Abdulrahman':  { countries: ['KSA', 'Saudi Arabia'],                             label: 'KSA',                     flag: '🇸🇦' },
+      'Lina':         { countries: ['Oman'],                                             label: 'Oman',                    flag: '🇴🇲' },
+      'Inass':        { countries: ['Morocco'],                                          label: 'Morocco',                 flag: '🇲🇦' },
+      'Eman':         { countries: ['UAE'],                                              label: 'UAE',                     flag: '🇦🇪' },
+      'Roshanka':     { countries: ['UAE'],                                              label: 'UAE',                     flag: '🇦🇪' },
+      'AhmedRyan':    { countries: null,                                                 label: 'Analytics',               flag: '📊', isAnalytics: true }
     };
+
+    // Role groups by country for the selection screen
+    const ROLE_GROUPS = [
+      { label: '🌍 GCC', roles: ['Paul', 'Alexandra', 'Eman', 'Roshanka', 'Osama', 'Ahmed', 'Khalid', 'MoayadNQ', 'Abdulrahman', 'Lina', 'Inass'] },
+      { label: '🌍 All Countries', roles: ['Cosmin'] },
+      { label: '📊 Analytics',     roles: ['AhmedRyan'] }
+    ];
 
     const SLACK_IDS = {
       'Cosmin': 'U07UZFZK6BN',
@@ -471,22 +552,39 @@
       'Ahmed': 'U04S96Y1FGZ',
     };
 
+    let _toastTimer;
+    function showToast(msg, type = 'ok') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'show ' + type;
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => { t.className = ''; }, 2500);
+    }
+
     async function sendSlackNotification(assignee, assignedBy, eventTitle, eventUrl) {
       const API_BASE = window.location.hostname.includes('vercel.app') ? '' : 'https://selly-dashboard-v2.vercel.app';
       try {
-        await fetch(`${API_BASE}/api/slack`, {
+        const res = await fetch(`${API_BASE}/api/slack`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ assignee, assignedBy, eventTitle, eventUrl })
         });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          console.warn('Slack error:', data.error || res.status);
+          showToast('Assigned ✓ (Slack: ' + (data.error || 'failed') + ')', 'err');
+        } else {
+          showToast('Assigned to ' + assignee + ' ✓', 'ok');
+        }
       } catch (err) {
         console.warn('Slack notification failed:', err);
+        showToast('Assigned ✓ (Slack offline)', 'err');
       }
     }
 
     async function assignLead(eventId, assigneeName, eventTitle, eventUrl) {
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/selly_clean?id=eq.${eventId}`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/selly_clean?id=eq.${eventId}`, {
           method: 'PATCH',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
@@ -496,22 +594,25 @@
           },
           body: JSON.stringify({ responsible: assigneeName || null })
         });
+        if (!res.ok) { showToast('Save failed: ' + res.status, 'err'); return; }
         // Update local data
         const item = allData.find(e => e.id === eventId);
         if (item) item.responsible = assigneeName || null;
-        // Send Slack notification only when assigning (not unassigning)
+        // Send Slack notification when assigning; show toast when unassigning
         if (assigneeName) {
           await sendSlackNotification(assigneeName, currentRole, eventTitle, eventUrl);
+        } else {
+          showToast('Unassigned ✓', 'ok');
         }
       } catch (err) {
         console.error('assignLead error:', err);
+        showToast('Error: ' + err.message, 'err');
       }
     }
 
-    async function updateStatus(eventId, newStatus, selectEl) {
-      if (newStatus === '__legacy__') return; // disabled option, shouldn't fire
+    async function updateStatus(eventId, newStatus, inputEl) {
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/selly_clean?id=eq.${eventId}`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/selly_clean?id=eq.${eventId}`, {
           method: 'PATCH',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
@@ -521,12 +622,21 @@
           },
           body: JSON.stringify({ status: newStatus || null })
         });
+        if (!res.ok) {
+          showToast('Save failed: ' + res.status, 'err');
+          inputEl.value = inputEl.dataset.orig || '';
+          return;
+        }
+        inputEl.dataset.orig = newStatus;
         const item = allData.find(e => e.id === eventId);
         if (item) item.status = newStatus || null;
-        // Update select color class
-        selectEl.className = 'status-select' + (newStatus ? ' s-' + newStatus : '');
+        const safeClass = ['new','done','skip'].includes(newStatus) ? ' s-' + newStatus : '';
+        inputEl.className = 'status-input' + safeClass;
+        showToast('Status saved ✓', 'ok');
       } catch (err) {
         console.error('updateStatus error:', err);
+        inputEl.value = inputEl.dataset.orig || '';
+        showToast('Error: ' + err.message, 'err');
       }
     }
 
@@ -587,10 +697,19 @@
 
     function renderRoleGrid() {
       const grid = document.getElementById('role-grid');
-      grid.innerHTML = Object.entries(ROLES).map(([name, info]) => `
-        <div class="role-btn" data-role="${name}" onclick="selectRole('${name}')">
-          ${name}
-          <div class="role-countries">${info.label}</div>
+      grid.innerHTML = ROLE_GROUPS.map(group => `
+        <div class="role-group-section">
+          <div class="role-group-label">${group.label}</div>
+          <div class="role-group-btns">
+            ${group.roles.map(name => {
+              const info = ROLES[name];
+              const displayName = name === 'AhmedRyan' ? 'Ahmed Ryan' : name;
+              return `<div class="role-btn" data-role="${name}" onclick="selectRole('${name}')">
+                ${displayName}
+                <div class="role-countries">${info.flag} ${info.label}</div>
+              </div>`;
+            }).join('')}
+          </div>
         </div>
       `).join('');
     }
@@ -619,8 +738,21 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('role-screen').style.display = 'none';
       document.getElementById('dashboard').classList.add('active');
-      document.getElementById('current-user').textContent = currentRole;
+
+      const isAnalytics = ROLES[currentRole]?.isAnalytics;
+      const displayName = currentRole === 'AhmedRyan' ? 'Ahmed Ryan' : currentRole;
+      document.getElementById('current-user').textContent = displayName;
       document.getElementById('user-countries').textContent = ROLES[currentRole].label;
+
+      // Toggle tab bars
+      document.getElementById('regular-tabs').style.display = isAnalytics ? 'none' : 'flex';
+      document.getElementById('analytics-tabs').style.display = isAnalytics ? 'flex' : 'none';
+
+      // Toggle content areas
+      document.getElementById('tab-data').style.display = isAnalytics ? 'none' : 'block';
+      document.getElementById('tab-week').style.display = 'none';
+      document.getElementById('analytics-content').style.display = isAnalytics ? 'block' : 'none';
+
       refreshSession();
       fetchData();
     }
@@ -702,8 +834,14 @@
         statusEl.className = 'status success';
         statusEl.innerHTML = `✅ Loaded ${allData.length} events`;
 
-        populateFilters();
-        applyFilters();
+        if (ROLES[currentRole]?.isAnalytics) {
+          renderEventsbyCountry();
+          renderAnalyticsWeekStats();
+          renderTeamPerformance();
+        } else {
+          populateFilters();
+          applyFilters();
+        }
       } catch (error) {
         statusEl.className = 'status error';
         statusEl.innerHTML = `❌ Error: ${error.message}`;
@@ -897,22 +1035,29 @@
 
       const renderRow = (e) => {
         const hasComment = e.comment && e.comment.trim();
-        const assignOptions = ['', ...Object.keys(ROLES)].map(name =>
-          `<option value="${escapeAttr(name)}" ${e.responsible === name ? 'selected' : ''}>${name || '— unassign —'}</option>`
-        ).join('');
+        const assignOptions = (() => {
+          const opts = ['', ...Object.keys(ROLES)].map(name =>
+            `<option value="${escapeAttr(name)}" ${e.responsible === name ? 'selected' : ''}>${name || '— unassign —'}</option>`
+          ).join('');
+          // If DB value doesn't match any known role (e.g. "Alexandra | Eman"), show it as a selectable option
+          if (e.responsible && !ROLES[e.responsible]) {
+            return `<option value="${escapeAttr(e.responsible)}" selected>${escapeHtml(e.responsible.substring(0, 40))}</option>` + opts;
+          }
+          return opts;
+        })();
         return `<tr>
           <td>${e.url ? `<a href="${e.url}" target="_blank">${escapeHtml(e.title)}</a>` : escapeHtml(e.title) || '—'}</td>
           <td>${escapeHtml(e.city) || '—'}</td>
           <td>${escapeHtml(e.category) || '—'}</td>
           <td>${e.date || '—'}</td>
-          <td><select class="status-select${['new','done','skip'].includes(e.status) ? ' s-' + e.status : ''}" onchange="updateStatus('${e.id}', this.value, this)" title="${escapeAttr(e.status || '')}">
-            ${e.status && !['new','done','skip'].includes(e.status)
-              ? `<option value="__legacy__" disabled selected>${escapeHtml(e.status.substring(0,30))}${e.status.length>30?'…':''}</option><option value="">— clear —</option>`
-              : `<option value="" ${!e.status ? 'selected' : ''}>—</option>`}
-            <option value="new" ${e.status === 'new' ? 'selected' : ''}>new</option>
-            <option value="done" ${e.status === 'done' ? 'selected' : ''}>done</option>
-            <option value="skip" ${e.status === 'skip' ? 'selected' : ''}>skip</option>
-          </select></td>
+          <td><input type="text" list="status-options"
+            class="status-input${['new','done','skip'].includes(e.status) ? ' s-' + e.status : ''}"
+            value="${escapeAttr(e.status || '')}"
+            placeholder="— status —"
+            data-orig="${escapeAttr(e.status || '')}"
+            onchange="updateStatus('${e.id}', this.value.trim(), this)"
+            onkeydown="if(event.key==='Enter'){this.blur();}"
+          ></td>
           <td class="assign-cell">
             <select class="assign-select ${e.responsible ? 'assigned' : ''}"
               data-id="${e.id}" data-title="${escapeAttr(e.title)}" data-url="${escapeAttr(e.url)}"
@@ -967,7 +1112,8 @@
     }
 
     // Week Stats
-    function renderWeekStats() {
+    function renderWeekStats(targetId) {
+      const containerId = targetId || 'week-content';
       const weekData = {};
 
       allData.forEach(e => {
@@ -1020,7 +1166,7 @@
         </div>
       `;
 
-      document.getElementById('week-content').innerHTML = html;
+      document.getElementById(containerId).innerHTML = html;
     }
 
     // Comment Modal
@@ -1127,6 +1273,133 @@
         btn.disabled = false;
         btn.textContent = 'Send Report';
       }
+    }
+
+    // ── Analytics (Ahmed Ryan) ──────────────────────────────────────────────
+
+    function switchAnalyticsTab(tab) {
+      document.querySelectorAll('#analytics-tabs .tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`#analytics-tabs .tab[onclick="switchAnalyticsTab('${tab}')"]`).classList.add('active');
+      ['countries', 'weeks', 'team'].forEach(t => {
+        document.getElementById(`analytics-tab-${t}`).style.display = t === tab ? 'block' : 'none';
+      });
+    }
+
+    function getFlagForCountry(c) {
+      const m = { UAE:'🇦🇪', Bahrain:'🇧🇭', Qatar:'🇶🇦', KSA:'🇸🇦', Oman:'🇴🇲', Morocco:'🇲🇦',
+                  Kuwait:'🇰🇼', Lebanon:'🇱🇧', Egypt:'🇪🇬', Jordan:'🇯🇴', UK:'🇬🇧', USA:'🇺🇸' };
+      return m[c] || '🌐';
+    }
+
+    function coverageClass(pct) {
+      if (pct >= 75) return 'green';
+      if (pct >= 40) return 'orange';
+      if (pct > 0)  return 'red';
+      return 'gray';
+    }
+
+    function renderEventsbyCountry() {
+      const byCountry = {};
+      allData.forEach(e => {
+        const c = normalizeCountry(e.country);
+        if (!byCountry[c]) byCountry[c] = { total: 0, commented: 0 };
+        byCountry[c].total++;
+        if (e.comment && e.comment.trim()) byCountry[c].commented++;
+      });
+
+      const sorted = Object.entries(byCountry).sort((a, b) => b[1].total - a[1].total);
+      const totalAll = allData.length;
+      const commentedAll = allData.filter(e => e.comment && e.comment.trim()).length;
+
+      const makeBar = (pct) => {
+        const cls = coverageClass(pct);
+        return `<div class="analytics-progress">
+          <div class="analytics-bar"><div class="analytics-bar-fill fill-${cls}" style="width:${pct}%"></div></div>
+          <span class="analytics-pct pct-${cls}">${pct}%</span>
+        </div>`;
+      };
+
+      const rows = sorted.map(([country, d]) => {
+        const pct = d.total > 0 ? Math.round(d.commented / d.total * 100) : 0;
+        return `<tr>
+          <td>${getFlagForCountry(country)} ${escapeHtml(country)}</td>
+          <td class="analytics-num">${d.total}</td>
+          <td class="analytics-num">${d.commented}</td>
+          <td class="analytics-num-warn">${d.total - d.commented}</td>
+          <td>${makeBar(pct)}</td>
+        </tr>`;
+      }).join('');
+
+      const totalPct = totalAll > 0 ? Math.round(commentedAll / totalAll * 100) : 0;
+
+      document.getElementById('analytics-tab-countries').innerHTML = `
+        <div class="analytics-card">
+          <h3>🌍 Events by Country</h3>
+          <div style="overflow-x:auto;">
+            <table class="analytics-table">
+              <thead><tr>
+                <th>Country / Region</th><th>Total Events</th>
+                <th>With Comments</th><th>Without Comments</th><th>Comment Coverage</th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+              <tfoot>
+                <tr class="analytics-total-row">
+                  <td>🏁 TOTAL</td>
+                  <td class="analytics-num">${totalAll}</td>
+                  <td class="analytics-num">${commentedAll}</td>
+                  <td class="analytics-num-warn">${totalAll - commentedAll}</td>
+                  <td>${makeBar(totalPct)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    function renderAnalyticsWeekStats() {
+      renderWeekStats('analytics-tab-weeks');
+    }
+
+    function renderTeamPerformance() {
+      const byPerson = {};
+      allData.forEach(e => {
+        if (!e.responsible) return;
+        // Handle compound values like "Alexandra | Eman"
+        e.responsible.split('|').map(n => n.trim()).filter(Boolean).forEach(name => {
+          if (!byPerson[name]) byPerson[name] = { assigned: 0, commented: 0 };
+          byPerson[name].assigned++;
+          if (e.comment && e.comment.trim()) byPerson[name].commented++;
+        });
+      });
+
+      const sorted = Object.entries(byPerson).sort((a, b) => b[1].assigned - a[1].assigned);
+
+      const rows = sorted.map(([name, d]) => {
+        const pct = d.assigned > 0 ? Math.round(d.commented / d.assigned * 100) : 0;
+        const cls = coverageClass(pct);
+        return `<tr>
+          <td>${escapeHtml(name)}</td>
+          <td class="analytics-num">${d.assigned}</td>
+          <td class="analytics-num">${d.commented}</td>
+          <td><div class="analytics-progress">
+            <div class="analytics-bar"><div class="analytics-bar-fill fill-${cls}" style="width:${pct}%"></div></div>
+            <span class="analytics-pct pct-${cls}">${pct}%</span>
+          </div></td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('analytics-tab-team').innerHTML = `
+        <div class="analytics-card">
+          <h3>👥 Team Performance</h3>
+          <div style="overflow-x:auto;">
+            <table class="analytics-table">
+              <thead><tr>
+                <th>Sales Person</th><th>Assigned Events</th><th>Commented</th><th>Coverage</th>
+              </tr></thead>
+              <tbody>${rows || '<tr><td colspan="4" style="color:#555;padding:20px;text-align:center;">No assigned events</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>`;
     }
 
     // Init
