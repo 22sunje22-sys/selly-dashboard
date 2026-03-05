@@ -100,6 +100,14 @@
     .comment-text.has-comment { color: #00d4ff; }
     .commented-by { font-size: 10px; color: #666; display: block; margin-top: 2px; }
 
+    /* Assign */
+    .assign-cell { white-space: nowrap; }
+    .assign-select { background: #1a1a1a; border: 1px solid #333; color: #ccc; border-radius: 4px; padding: 4px 6px; font-size: 12px; cursor: pointer; min-width: 90px; }
+    .assign-select:hover { border-color: #00d4ff; }
+    .assign-select:focus { outline: none; border-color: #00d4ff; }
+    .assign-select option { background: #1a1a1a; }
+    .assign-select.assigned { color: #00d4ff; border-color: #00d4ff44; }
+
     /* Country Groups */
     .country-group { margin-bottom: 30px; }
     .country-header { background: linear-gradient(135deg, #1a1a1a 0%, #111 100%); padding: 15px 20px; border-radius: 12px 12px 0 0; border: 1px solid #333; border-bottom: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; }
@@ -445,6 +453,52 @@
       'Eman': { countries: ['UAE'], label: 'UAE' },
       'Roshanka': { countries: ['UAE'], label: 'UAE' }
     };
+
+    const SLACK_IDS = {
+      'Cosmin': 'U07UZFZK6BN',
+      'Paul': 'U042PH2AF0C',
+      'Osama': 'U03TW0TEX5B',
+      'Alexandra': 'U02SQH3RXPV',
+      'Ahmed': 'U04S96Y1FGZ',
+    };
+
+    async function sendSlackNotification(assignee, assignedBy, eventTitle, eventUrl) {
+      try {
+        await fetch('/api/slack', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ assignee, assignedBy, eventTitle, eventUrl })
+        });
+      } catch (err) {
+        console.warn('Slack notification failed:', err);
+      }
+    }
+
+    async function assignLead(eventId, assigneeName, eventTitle, eventUrl) {
+      const SUPABASE_URL = 'https://kwftlkfvtglnugxsyjci.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3ZnRsa2Z2dGdsbnVneHN5amNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk1MzQ3MTcsImV4cCI6MjA1NTExMDcxN30.Opb-RnGMeomJXAEiZPBjjfnJfBjGi8I7dHmA-xuBK_g';
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/selly_clean?id=eq.${eventId}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ assigned_to: assigneeName || null })
+        });
+        // Update local data
+        const item = allData.find(e => e.id === eventId);
+        if (item) item.assigned_to = assigneeName || null;
+        // Send Slack notification only when assigning (not unassigning)
+        if (assigneeName) {
+          await sendSlackNotification(assigneeName, currentRole, eventTitle, eventUrl);
+        }
+      } catch (err) {
+        console.error('assignLead error:', err);
+      }
+    }
 
     let allData = [], filteredData = [];
     let currentRole = null;
@@ -813,12 +867,22 @@
 
       const renderRow = (e) => {
         const hasComment = e.comment && e.comment.trim();
+        const assignOptions = ['', ...Object.keys(ROLES)].map(name =>
+          `<option value="${escapeAttr(name)}" ${e.assigned_to === name ? 'selected' : ''}>${name || '— unassign —'}</option>`
+        ).join('');
         return `<tr>
           <td>${e.url ? `<a href="${e.url}" target="_blank">${escapeHtml(e.title)}</a>` : escapeHtml(e.title) || '—'}</td>
           <td>${escapeHtml(e.city) || '—'}</td>
           <td>${escapeHtml(e.category) || '—'}</td>
           <td>${e.date || '—'}</td>
           <td>${getStatusBadge(e.status)}</td>
+          <td class="assign-cell">
+            <select class="assign-select ${e.assigned_to ? 'assigned' : ''}"
+              data-id="${e.id}" data-title="${escapeAttr(e.title)}" data-url="${escapeAttr(e.url)}"
+              onchange="assignLead(${e.id}, this.value, ${JSON.stringify(e.title)}, ${JSON.stringify(e.url || '')}); this.className='assign-select'+(this.value?' assigned':'')">
+              ${assignOptions}
+            </select>
+          </td>
           <td class="comment-cell">
             <span class="comment-text ${hasComment ? 'has-comment' : 'empty'}"
               data-id="${e.id}" data-title="${escapeAttr(e.title)}" data-comment="${escapeAttr(e.comment)}">
@@ -847,7 +911,7 @@
             <div class="country-table-wrap">
               <table>
                 <thead><tr>
-                  <th>Title</th><th>City</th><th>Category</th><th>Date</th><th>Status</th><th>Comment</th>
+                  <th>Title</th><th>City</th><th>Category</th><th>Date</th><th>Status</th><th>Assign</th><th>Comment</th>
                 </tr></thead>
                 <tbody>${events.map(renderRow).join('')}</tbody>
               </table>
