@@ -486,11 +486,11 @@
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ assigned_to: assigneeName || null })
+          body: JSON.stringify({ responsible: assigneeName || null })
         });
         // Update local data
         const item = allData.find(e => e.id === eventId);
-        if (item) item.assigned_to = assigneeName || null;
+        if (item) item.responsible = assigneeName || null;
         // Send Slack notification only when assigning (not unassigning)
         if (assigneeName) {
           await sendSlackNotification(assigneeName, currentRole, eventTitle, eventUrl);
@@ -868,7 +868,7 @@
       const renderRow = (e) => {
         const hasComment = e.comment && e.comment.trim();
         const assignOptions = ['', ...Object.keys(ROLES)].map(name =>
-          `<option value="${escapeAttr(name)}" ${e.assigned_to === name ? 'selected' : ''}>${name || '— unassign —'}</option>`
+          `<option value="${escapeAttr(name)}" ${e.responsible === name ? 'selected' : ''}>${name || '— unassign —'}</option>`
         ).join('');
         return `<tr>
           <td>${e.url ? `<a href="${e.url}" target="_blank">${escapeHtml(e.title)}</a>` : escapeHtml(e.title) || '—'}</td>
@@ -877,7 +877,7 @@
           <td>${e.date || '—'}</td>
           <td>${getStatusBadge(e.status)}</td>
           <td class="assign-cell">
-            <select class="assign-select ${e.assigned_to ? 'assigned' : ''}"
+            <select class="assign-select ${e.responsible ? 'assigned' : ''}"
               data-id="${e.id}" data-title="${escapeAttr(e.title)}" data-url="${escapeAttr(e.url)}"
               onchange="assignLead(${e.id}, this.value, ${JSON.stringify(e.title)}, ${JSON.stringify(e.url || '')}); this.className='assign-select'+(this.value?' assigned':'')">
               ${assignOptions}
