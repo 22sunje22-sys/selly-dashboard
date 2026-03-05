@@ -904,7 +904,7 @@
           <td>${escapeHtml(e.city) || '—'}</td>
           <td>${escapeHtml(e.category) || '—'}</td>
           <td>${e.date || '—'}</td>
-          <td><select class="status-select${e.status ? ' s-' + e.status : ''}" onchange="updateStatus(${e.id}, this.value, this)">
+          <td><select class="status-select${['new','done','skip'].includes(e.status) ? ' s-' + e.status : ''}" onchange="updateStatus('${e.id}', this.value, this)">
             <option value="" ${!e.status ? 'selected' : ''}>—</option>
             <option value="new" ${e.status === 'new' ? 'selected' : ''}>new</option>
             <option value="done" ${e.status === 'done' ? 'selected' : ''}>done</option>
@@ -913,7 +913,7 @@
           <td class="assign-cell">
             <select class="assign-select ${e.responsible ? 'assigned' : ''}"
               data-id="${e.id}" data-title="${escapeAttr(e.title)}" data-url="${escapeAttr(e.url)}"
-              onchange="assignLead(${e.id}, this.value, ${JSON.stringify(e.title)}, ${JSON.stringify(e.url || '')}); this.className='assign-select'+(this.value?' assigned':'')">
+              onchange="assignLead('${e.id}', this.value, ${JSON.stringify(e.title)}, ${JSON.stringify(e.url || '')}); this.className='assign-select'+(this.value?' assigned':'')">
               ${assignOptions}
             </select>
           </td>
