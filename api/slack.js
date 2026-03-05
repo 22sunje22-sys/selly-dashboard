@@ -25,10 +25,10 @@ module.exports = async (req, res) => {
     }
 
     const assigneeSlackId = SLACK_IDS[assignee];
-    const mention = assigneeSlackId ? `<@${assigneeSlackId}>` : `*${assignee}*`;
+    const mentionSuffix = assigneeSlackId ? ` <@${assigneeSlackId}>` : '';
 
     const slackMessage = {
-      text: `🔔 New Lead Assignment — ${assignee} has been assigned a lead by ${assignedBy}`,
+      text: `🔔 ${assignedBy} assigned ${assignee} to a new lead`,
       blocks: [
         {
           type: 'header',
@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `${mention} you've been assigned a new lead by *${assignedBy}*:`
+            text: `*${assignedBy}* assigned *${assignee}*${mentionSuffix} to a new lead:`
           }
         },
         {
