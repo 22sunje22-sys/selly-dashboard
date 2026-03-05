@@ -1055,13 +1055,15 @@
             value="${escapeAttr(e.status || '')}"
             placeholder="— status —"
             data-orig="${escapeAttr(e.status || '')}"
+            onfocus="this.dataset.pre=this.value; this.value=''"
+            onblur="if(!this.value.trim())this.value=this.dataset.pre"
             onchange="updateStatus('${e.id}', this.value.trim(), this)"
             onkeydown="if(event.key==='Enter'){this.blur();}"
           ></td>
           <td class="assign-cell">
             <select class="assign-select ${e.responsible ? 'assigned' : ''}"
               data-id="${e.id}" data-title="${escapeAttr(e.title)}" data-url="${escapeAttr(e.url)}"
-              onchange="assignLead('${e.id}', this.value, ${JSON.stringify(e.title)}, ${JSON.stringify(e.url || '')}); this.className='assign-select'+(this.value?' assigned':'')">
+              onchange="assignLead('${e.id}', this.value, this.dataset.title, this.dataset.url); this.className='assign-select'+(this.value?' assigned':'')">
               ${assignOptions}
             </select>
           </td>
