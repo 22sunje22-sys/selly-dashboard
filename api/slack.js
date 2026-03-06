@@ -1,11 +1,17 @@
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK_URL;
 
 const SLACK_IDS = {
-  'Cosmin': 'U07UZFZK6BN',
-  'Paul': 'U042PH2AF0C',
-  'Osama': 'U03TW0TEX5B',
-  'Alexandra': 'U02SQH3RXPV',
-  'Ahmed': 'U04S96Y1FGZ',
+  'Cosmin':      'U07UZFZK6BN',
+  'Paul':        'U042PH2AF0C',
+  'Osama':       'U03TW0TEX5B',
+  'Alexandra':   'U02SQH3RXPV',
+  'Ahmed':       'U04S96Y1FGZ',
+  'Khalid':      'U09HT2B3DHT',
+  'MoayadNQ':    'U04KRPSUR4Z',
+  'Abdulrahman': 'U04QA3E69K5',
+  'Lina':        'U06R6UK6VD2',
+  'Inass':       'U0923SFUB6F',
+  'Eman':        'U03TA23N4KB',
 };
 
 module.exports = async (req, res) => {

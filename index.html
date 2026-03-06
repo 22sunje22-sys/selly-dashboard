@@ -545,11 +545,17 @@
     ];
 
     const SLACK_IDS = {
-      'Cosmin': 'U07UZFZK6BN',
-      'Paul': 'U042PH2AF0C',
-      'Osama': 'U03TW0TEX5B',
-      'Alexandra': 'U02SQH3RXPV',
-      'Ahmed': 'U04S96Y1FGZ',
+      'Cosmin':      'U07UZFZK6BN',
+      'Paul':        'U042PH2AF0C',
+      'Osama':       'U03TW0TEX5B',
+      'Alexandra':   'U02SQH3RXPV',
+      'Ahmed':       'U04S96Y1FGZ',
+      'Khalid':      'U09HT2B3DHT',
+      'MoayadNQ':    'U04KRPSUR4Z',
+      'Abdulrahman': 'U04QA3E69K5',
+      'Lina':        'U06R6UK6VD2',
+      'Inass':       'U0923SFUB6F',
+      'Eman':        'U03TA23N4KB',
     };
 
     let _toastTimer;
@@ -562,7 +568,7 @@
     }
 
     async function sendSlackNotification(assignee, assignedBy, eventTitle, eventUrl) {
-      const API_BASE = window.location.hostname.includes('vercel.app') ? '' : 'https://selly-dashboard-v2.vercel.app';
+      const API_BASE = '';
       try {
         const res = await fetch(`${API_BASE}/api/slack`, {
           method: 'POST',
@@ -1257,7 +1263,7 @@
       btn.textContent = 'Sending...';
 
       try {
-        const API_BASE = window.location.hostname.includes('vercel.app') ? '' : 'https://selly-dashboard-v2.vercel.app';
+        const API_BASE = '';
         const res = await fetch(`${API_BASE}/api/report`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
